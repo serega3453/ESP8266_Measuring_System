@@ -1,0 +1,11 @@
+# PlatformIO
+.pio/
+.pioenvs/
+lib/    # если вы не хотите хранить локальные сторонние библиотеки
+*.bin
+*.elf
+.vscode/
+.env
+.idea/
+build/
+.arduino/
