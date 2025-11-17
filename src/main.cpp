@@ -1,8 +1,10 @@
 #include <ntc_utils.h>
 #include <sht_utils.h>
 #include "mqtt_utils.h"
+#include "udp_utils.h"
 #include <Wire.h>
 #include <Adafruit_ADS1X15.h>
+#include <ArduinoJson.h>
 
 Adafruit_ADS1115 ads;
 
@@ -14,22 +16,25 @@ void setup() {
   Serial.println("I2C initialized.");
   ads.begin();
   Serial.println("ADS1115 initialized.");
-  mqtt_init();
-  Serial.println("MQTT initialized.");
+  udpInit();
+  Serial.println("UDP initialized.");
 
   Serial.println("ESP8266 Thermal Monitor + Internal ADC + SHT21");
 }
 
 // ------------------------
 void loop() {
+  StaticJsonDocument<256> doc;
   // ---- NTC ----
-  for (int i = 0; i < 4; i++) {
+for (int i = 0; i < 4; i++) {
     float temp = readTemperatureNTC(i);
     Serial.print("T");
     Serial.print(i + 1);
     Serial.print(": ");
     Serial.print(temp, 2);
     Serial.print(" °C  ");
+
+    doc[String("T") + (i + 1)] = temp;
   }
 
   // ---- SHT21 ----
@@ -44,17 +49,13 @@ void loop() {
   Serial.print(sht_rh, 1);
   Serial.println(" %");
 
-  String payload = "{";
-  payload += "\"T1\":" + String(readTemperatureNTC(0), 2) + ",";
-  payload += "\"T2\":" + String(readTemperatureNTC(1), 2) + ",";
-  payload += "\"T3\":" + String(readTemperatureNTC(2), 2) + ",";
-  payload += "\"T4\":" + String(readTemperatureNTC(3), 2) + ",";
-  payload += "\"SHT_T\":" + String(readSHT21_T(), 2) + ",";
-  payload += "\"SHT_RH\":" + String(readSHT21_RH(), 1);
-  payload += "}";
+  doc["SHT_T"]  = sht_t;
+  doc["SHT_RH"] = sht_rh;
 
-  mqtt_send(payload);
-  mqtt_loop();
+  String payload;
+  serializeJson(doc, payload);
+
+  udpSend(payload);
 
   delay(1000);
 }
