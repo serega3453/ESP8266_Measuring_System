@@ -10,10 +10,6 @@ const float R0 = 100000.0;
 const float T0 = 298.15;
 const float SERIES_RESISTOR = 10000.0;
 
-// ---- Встроенный АЦП ----
-const float ADC_VREF = 1.0;
-const int   ADC_MAX  = 1023;
-
 // ------------------------
 // NTC
 // ------------------------
@@ -47,18 +43,11 @@ void loop() {
     Serial.print(" °C  ");
   }
 
-  // ---- ADC ----
-  int raw = analogRead(A0);
-  float adc_v = (raw * ADC_VREF) / ADC_MAX;
-  Serial.print("| ADC: ");
-  Serial.print(adc_v, 3);
-  Serial.print(" V  ");
-
   // ---- SHT21 ----
   float sht_t  = readSHT21_T();
   float sht_rh = readSHT21_RH();
 
-  Serial.print("| SHT_T: ");
+  Serial.print("|  SHT_T: ");
   Serial.print(sht_t, 2);
   Serial.print(" °C  ");
 
