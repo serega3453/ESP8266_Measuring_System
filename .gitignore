@@ -10,3 +10,4 @@ lib/    # если вы не хотите хранить локальные ст
 build/
 .arduino/
 UDP_logger_final/uart_eth.log
+UDP_logger_final/thermal.log
