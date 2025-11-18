@@ -1,7 +1,7 @@
 import socket
 from datetime import datetime
 
-HOST = "192.168.5.8"
+HOST = "192.6.0.205"
 PORT = 8888
 LOGFILE = "uart_eth.log"
 
@@ -10,16 +10,27 @@ sock.connect((HOST, PORT))
 
 print(f"Connected to {HOST}:{PORT}")
 
+buffer = ""  # буфер для недостающих хвостов
+
 while True:
     data = sock.recv(4096)
     if not data:
         break
 
-    raw = data.decode(errors="replace").strip()
-    ts = datetime.now().isoformat()
-    line = f"{ts} {raw}"
+    buffer += data.decode(errors="replace")
 
-    print(line)
+    # Разбираем по \n
+    while "\n" in buffer:
+        line, buffer = buffer.split("\n", 1)
+        line = line.strip()
 
-    with open(LOGFILE, "a") as f:
-        f.write(line + "\n")
+        if not line:
+            continue
+
+        ts = datetime.now().isoformat()
+        full = f"{ts} {line}"
+
+        print(full)
+
+        with open(LOGFILE, "a") as f:
+            f.write(full + "\n")
